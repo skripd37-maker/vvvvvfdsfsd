@@ -2,423 +2,185 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>NONAME RADIO — приёмник</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>NONAME RADIO</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            user-select: none; /* лёгкий эффект "интерфейса" */
-        }
-
-        body {
-            min-height: 100vh;
-            background: radial-gradient(circle at 20% 30%, #0a0f1a, #030507);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: 'Courier New', 'Fira Code', 'JetBrains Mono', monospace;
-            padding: 20px;
-        }
-
-        /* ОСНОВНАЯ РАЦИЯ / ПРИЁМНИК */
-        .radio {
-            max-width: 560px;
-            width: 100%;
-            background: #0b0e14;
-            background-image: repeating-linear-gradient(45deg, rgba(0,255,65,0.02) 0px, rgba(0,255,65,0.02) 2px, transparent 2px, transparent 8px);
-            border: 2px solid #1f3b2c;
-            border-radius: 42px;
-            box-shadow: 0 25px 45px rgba(0,0,0,0.6), inset 0 1px 0 rgba(80,255,120,0.1), 0 0 0 2px #0a1a12;
-            padding: 24px 20px 32px;
-            transition: all 0.2s;
-        }
-
-        /* СЕТКА НАЗВАНИЙ (как старый ресивер) */
-        .brand {
-            text-align: center;
-            margin-bottom: 20px;
-            border-bottom: 1px dashed #2a5a3a;
-            padding-bottom: 12px;
-        }
-        .noname-glow {
-            font-size: 2rem;
-            letter-spacing: 6px;
-            font-weight: 800;
-            color: #b0ffc0;
-            text-shadow: 0 0 6px #00cc66, 0 0 1px #aaffaa;
-            word-break: keep-all;
-        }
-        .sub {
-            font-size: 0.7rem;
-            color: #6a9c7a;
-            font-family: monospace;
-            margin-top: 6px;
-            letter-spacing: 1px;
-        }
-
-        /* ЧАСТОТОМЕР / ИНДИКАТОР СИГНАЛА */
-        .tuner {
-            background: #03070c;
-            border-radius: 60px;
-            padding: 12px 18px;
-            margin: 20px 0;
-            border: 1px solid #2a553a;
-            box-shadow: inset 0 0 10px #00000055, 0 2px 4px #00aa4422;
-        }
-        .freq-label {
-            display: flex;
-            justify-content: space-between;
-            color: #5c9870;
-            font-size: 0.7rem;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-        .freq-bar {
-            background: #000000aa;
-            height: 6px;
-            border-radius: 6px;
-            overflow: hidden;
-            margin: 8px 0;
-        }
-        .freq-level {
-            width: 0%;
-            height: 100%;
-            background: #00ee77;
-            box-shadow: 0 0 6px #00ee77;
-            transition: width 0.2s ease;
-        }
-        .frequency-value {
-            font-size: 2.1rem;
-            font-weight: bold;
-            text-align: center;
-            font-family: monospace;
-            letter-spacing: 3px;
-            color: #a2ffb0;
-            background: #07100b;
-            display: inline-block;
-            width: 100%;
-            padding: 8px 0;
-            border-radius: 40px;
-            margin-top: 6px;
-            text-shadow: 0 0 3px #00aa44;
-        }
-
-        /* ОСНОВНОЙ ПЛЕЕР — КАК СТАРЫЙ ТЮНЕР */
-        .player-section {
-            background: #03080e66;
-            backdrop-filter: blur(3px);
-            border-radius: 28px;
-            padding: 18px;
-            margin: 20px 0;
-            border: 1px solid #1c5538;
-        }
-        .button-power {
-            background: #1b2a1f;
-            border: 2px solid #39ff8e;
-            color: #bfffcb;
-            font-size: 1.8rem;
-            font-weight: bold;
-            padding: 16px 12px;
-            width: 100%;
-            border-radius: 60px;
-            cursor: pointer;
-            font-family: monospace;
-            transition: 0.1s linear;
-            text-align: center;
-            letter-spacing: 3px;
-            backdrop-filter: blur(4px);
-            box-shadow: 0 2px 8px black;
-        }
-        .button-power:active {
-            transform: scale(0.97);
-            background: #1f442a;
-        }
-        .status-text {
-            text-align: center;
-            margin-top: 15px;
-            font-size: 0.85rem;
-            background: #00000066;
-            padding: 8px;
-            border-radius: 60px;
-            font-weight: bold;
-        }
-        .wave {
-            color: #3eff8a;
-            animation: pulse 1.2s infinite;
-        }
-        @keyframes pulse {
-            0% { opacity: 0.4; text-shadow: 0 0 0px #00ff88; }
-            100% { opacity: 1; text-shadow: 0 0 5px #00ff88; }
-        }
-
-        /* ИНФО-БЛОК: ТОЛЬКО ПРЯМОЙ ЭФИР */
-        .live-badge {
-            background: #0d1910;
-            border-left: 8px solid #44ff88;
-            padding: 12px 16px;
-            margin: 18px 0;
-            font-size: 0.85rem;
-            border-radius: 18px;
-        }
-        .countdown {
-            font-family: monospace;
-            font-size: 1.35rem;
-            font-weight: bold;
-            background: #030703;
-            padding: 12px;
-            text-align: center;
-            border-radius: 40px;
-            margin: 15px 0;
-            color: #aaffbb;
-        }
-
-        /* Архивная пометка */
-        .footnote {
-            font-size: 0.65rem;
-            text-align: center;
-            color: #3f7457;
-            margin-top: 20px;
-            border-top: 1px dashed #1e553a;
-            padding-top: 14px;
-        }
-        a {
-            color: #5dcf8b;
-            text-decoration: none;
-        }
-        .no-stream {
-            background: #2a1f1faa;
-            border-color: #ff6666;
-        }
-        button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{min-height:100vh;background:#0a0f1a;font-family:'Courier New',monospace;padding:16px;display:flex;justify-content:center;align-items:center;}
+        .radio{max-width:500px;width:100%;background:#0b0e14;border-radius:38px;border:2px solid #2a5a3a;padding:24px 20px 32px;}
+        .noname{font-size:2rem;font-weight:800;color:#aaffcc;letter-spacing:4px;text-shadow:0 0 6px #00cc66;text-align:center;}
+        .sub{font-size:0.7rem;color:#6a9c7a;text-align:center;margin:8px 0 20px;}
+        .tuner{background:#03070c;border-radius:32px;padding:16px;margin:20px 0;border:1px solid #2a553a;}
+        .signal-row{display:flex;justify-content:space-between;font-size:0.7rem;color:#5c9870;margin-bottom:8px;}
+        .signal-bar{background:#1a2a22;height:8px;border-radius:8px;overflow:hidden;margin-bottom:16px;}
+        .signal-fill{width:0%;height:100%;background:#00ee77;box-shadow:0 0 6px #00ee77;transition:width 0.2s;}
+        .frequency{font-size:1.4rem;text-align:center;font-family:monospace;color:#b0ffc0;margin-top:8px;}
+        .btn-power{width:100%;background:#1b2a1f;border:2px solid #39ff8e;color:#bfffcb;font-size:1.5rem;font-weight:bold;padding:14px;border-radius:60px;cursor:pointer;font-family:monospace;margin:16px 0;}
+        .btn-power:active{transform:scale(0.97);}
+        .status{text-align:center;font-size:0.75rem;background:#00000055;padding:8px;border-radius:60px;}
+        .countdown{background:#030703;padding:12px;text-align:center;border-radius:32px;font-size:0.85rem;margin:16px 0;}
+        .footer{font-size:0.6rem;text-align:center;margin-top:20px;color:#3f7457;}
+        a{color:#5dcf8b;}
+        .progress-bar{background:#1a2a22;height:4px;border-radius:4px;margin:12px 0;cursor:pointer;}
+        .progress-fill{width:0%;height:100%;background:#39ff8e;border-radius:4px;}
+        .time-info{display:flex;justify-content:space-between;font-size:0.6rem;color:#5c9870;margin-top:4px;}
     </style>
 </head>
 <body>
-
-<div class="radio" id="radioApp">
-    <div class="brand">
-        <div class="noname-glow">❖ NONAME RADIO ❖</div>
-        <div class="sub">* безымянный сигнал | thurinay</div>
-    </div>
-
-    <!-- ВИЗУАЛЬНЫЙ ТЮНЕР -->
-    <div class="tuner">
-        <div class="freq-label">
-            <span>◀ SIGNAL STRENGTH ▶</span>
-            <span id="signalPercent">0%</span>
-        </div>
-        <div class="freq-bar">
-            <div class="freq-level" id="signalLevel" style="width: 0%;"></div>
-        </div>
-        <div class="frequency-value" id="freqDisplay">
-            98.4 FM ⚡
-        </div>
-    </div>
-
-    <!-- ЦЕНТРАЛЬНЫЙ БЛОК СТРИМА -->
-    <div class="player-section">
-        <button class="button-power" id="playBtn">
-            🔘 ВКЛЮЧИТЬ ЭФИР
-        </button>
-        <div class="status-text" id="statusMsg">
-            ⚡ приёмник ожидает сигнала
-        </div>
-        <!-- скрытый аудиоэлемент -->
-        <audio id="streamAudio" preload="none"></audio>
-    </div>
-
-    <div class="live-badge">
-        ⚡ ИСТИННЫЙ NONAME RADIO существует только здесь.<br>
-        🎧 Сок — только в прямом эфире <strong>23.04.26 в 00:00 (МСК)</strong><br>
-        📡 Техническое открытие: <strong>23.04.26 23:45</strong>
-    </div>
+<div class="radio">
+    <div class="noname">❖ NONAME RADIO ❖</div>
+    <div class="sub">*.noname = безымянный сигнал | thurinay</div>
 
     <div class="countdown" id="countdownBlock">
-        🔽 ДО СТАРТА СИГНАЛА 🔽<br>
-        <span id="timer">-- -- --</span>
+        🔽 ДО СТАРТА ЭФИРА 🔽<br>
+        <span id="timer" style="font-size:1.6rem;font-weight:bold;color:#39ff8e;">--:--:--</span>
     </div>
 
-    <div class="footnote">
-        🎚️ повторы приветствуются • архив позже на площадках<br>
-        presave → <a href="https://band.link/nonameradio" target="_blank">band.link/nonameradio</a>
+    <div class="tuner">
+        <div class="signal-row"><span>◀ SIGNAL ▶</span><span id="signalPercent">0%</span></div>
+        <div class="signal-bar"><div class="signal-fill" id="signalFill"></div></div>
+        <div class="frequency" id="freqText">📡 98.4 FM</div>
     </div>
+
+    <div class="progress-bar" id="progressBar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="time-info"><span id="currentTime">0:00</span><span id="totalTime">0:00</span></div>
+
+    <button class="btn-power" id="playBtn">🔘 ВКЛЮЧИТЬ ЭФИР</button>
+    <div class="status" id="statusMsg">⚡ приёмник ожидает сигнала</div>
+
+    <div class="footer"><a href="https://band.link/nonameradio" target="_blank">🎛️ presave band.link/nonameradio</a><br>повторы приветствуются • архив позже</div>
 </div>
+<audio id="streamAudio" preload="auto"></audio>
 
 <script>
-    // ⚡ КОНФИГУРАЦИЯ — замени ссылку на стрим за 5 минут до эфира!
-    // ВАЖНО: ссылку на прямой эфир (HLS, m3u8, mp3-поток или youtube embed) вы вставите сюда:
-    const MP3_URL = "https://drive.google.com/uc?export=download&id=1V3WtwBMpieDdbXaZoI4g0wyvtXqx5U3m";   // <--- ЗАМЕНИТЕ на реальную ссылку стрима перед эфиром
+    // ==============================================
+    // ВАША ССЫЛКА НА MP3 (уже вставлена)
+    // ==============================================
+    const AUDIO_URL = "https://github.com/skripd37-maker/vvvvvfdsfsd/raw/refs/heads/main/%D0%BD%D0%BE%D1%83%D0%BD%D0%B5%D0%B9%D0%BC%20%D1%80%D0%B0%D0%B4%D0%B8%D0%BE%20%D1%84%D1%83%D0%BB%D0%BB%20%D1%81%D1%8D%D1%82%20+%20%D0%B0%D0%BB%D1%8C%20(online-audio-converter.com).mp3";
     
-    // ЕСЛИ У ВАС YOUTUBE (embed) — РАСКОММЕНТИРУЙТЕ НИЖЕ И ЗАКОММЕНТИРУЙТЕ АУДИО-ЛОГИКУ
-    // но для кастомного радио лучше использовать аудиопоток .mp3 / .m3u8 . Но можете адаптировать
-    
-    // Флаг для имитации сигнала (пока нет реального стрима)
-    let isPlaying = false;
-    let fakeInterval = null;
-    
-    // DOM элементы
+    const audio = document.getElementById('streamAudio');
     const playBtn = document.getElementById('playBtn');
     const statusMsg = document.getElementById('statusMsg');
-    const streamAudio = document.getElementById('streamAudio');
-    const signalLevelDiv = document.getElementById('signalLevel');
+    const signalFill = document.getElementById('signalFill');
     const signalPercentSpan = document.getElementById('signalPercent');
-    const freqDisplaySpan = document.getElementById('freqDisplay');
+    const freqText = document.getElementById('freqText');
+    const progressFill = document.getElementById('progressFill');
+    const currentTimeSpan = document.getElementById('currentTime');
+    const totalTimeSpan = document.getElementById('totalTime');
+    const progressBar = document.getElementById('progressBar');
     
-    // ОБРАТНЫЙ ОТСЧЁТ ДО 23.04.2026 23:45:00 MSK (московское время)
+    let isPlaying = false;
+    let saveInterval = null;
+    
+    function formatTime(seconds) {
+        if (isNaN(seconds)) return "0:00";
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return mins + ":" + (secs < 10 ? "0" + secs : secs);
+    }
+    
+    function updateProgress() {
+        if (audio.duration) {
+            progressFill.style.width = (audio.currentTime / audio.duration * 100) + '%';
+            currentTimeSpan.innerText = formatTime(audio.currentTime);
+            totalTimeSpan.innerText = formatTime(audio.duration);
+        }
+    }
+    
+    function updateSignal() {
+        if (isPlaying && audio.src) {
+            let strong = 75 + Math.sin(Date.now() / 700) * 15;
+            strong = Math.min(96, Math.max(70, strong));
+            signalFill.style.width = strong + '%';
+            signalPercentSpan.innerText = Math.floor(strong) + '%';
+            freqText.innerHTML = "⚡ 104.2 NONAME FM ⚡";
+        } else {
+            let low = 10 + Math.sin(Date.now() / 1000) * 8;
+            low = Math.min(30, Math.max(6, low));
+            signalFill.style.width = low + '%';
+            signalPercentSpan.innerText = Math.floor(low) + '%';
+            freqText.innerHTML = "📡 шум эфира";
+        }
+    }
+    
     function getTargetTime() {
-        // цель: 23 апреля 2026, 23:45:00 по Москве (UTC+3)
-        return new Date('2026-04-23T23:45:00+03:00');
+        return new Date('2026-04-23T23:40:00+03:00');
     }
     
     function updateCountdown() {
         const now = new Date();
         const target = getTargetTime();
         const diff = target - now;
-        
         const timerSpan = document.getElementById('timer');
+        
         if (diff <= 0) {
-            timerSpan.innerHTML = "🔴 ЭФИР АКТИВЕН 🔴";
+            timerSpan.innerHTML = "🔴 В ЭФИРЕ 🔴";
             document.getElementById('countdownBlock').style.background = "#102211";
             return;
         }
-        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((diff % (86400000)) / (3600000));
+        const hours = Math.floor(diff / (1000 * 60 * 60));
         const mins = Math.floor((diff % 3600000) / 60000);
         const secs = Math.floor((diff % 60000) / 1000);
-        timerSpan.innerHTML = `${days}д ${hours}ч ${mins}м ${secs}с`;
+        timerSpan.innerHTML = `${hours}ч ${mins}м ${secs}с`;
     }
     
-    // Имитация уровня сигнала + визуальный "тюнер"
-    function updateSignalStrength(playing, hasStream = false) {
-        if (!playing || !hasStream) {
-            let lowSignal = 12 + Math.sin(Date.now() / 1000) * 6;
-            lowSignal = Math.min(28, Math.max(8, lowSignal));
-            signalLevelDiv.style.width = lowSignal + '%';
-            signalPercentSpan.innerText = Math.floor(lowSignal) + '%';
-            freqDisplaySpan.innerHTML = "📡 ~ ---.- MHz ~ шум";
-            return;
-        }
-        // если реально играет и стрим подключен – показываем мощный сигнал 72-98%
-        let strongSignal = 78 + Math.sin(Date.now() / 800) * 12;
-        strongSignal = Math.min(98, Math.max(72, strongSignal));
-        signalLevelDiv.style.width = strongSignal + '%';
-        signalPercentSpan.innerText = Math.floor(strongSignal) + '%';
-        freqDisplaySpan.innerHTML = "⚡ 104.2 NONAME FM ⚡";
-    }
-    
-    let signalInterval;
-    function startSignalMeter(playingFlag, streamReady) {
-        if (signalInterval) clearInterval(signalInterval);
-        signalInterval = setInterval(() => {
-            const streamSource = streamAudio.src && streamAudio.src !== "" && !streamAudio.error;
-            const isStreamActive = (playingFlag && streamSource);
-            updateSignalStrength(playingFlag, isStreamActive);
-        }, 300);
-    }
-    
-    // Функция остановки воспроизведения
-    function stopStream() {
-        streamAudio.pause();
-        streamAudio.src = "";
-        streamAudio.load();
-        isPlaying = false;
-        playBtn.innerText = "🔘 ВКЛЮЧИТЬ ЭФИР";
-        statusMsg.innerHTML = "📻 приёмник выключен. ждите 23.04 в 23:45";
-        statusMsg.style.color = "#aa9988";
-        if (signalInterval) clearInterval(signalInterval);
-        startSignalMeter(false, false);
-    }
-    
-    // Инициализация попытки проигрывания реального стрима
-    function initStream() {
-        if (!STREAM_URL || STREAM_URL === "https://your-stream-url-here.com/stream") {
-            statusMsg.innerHTML = "❌ ССЫЛКА НА СТРИМ НЕ НАСТРОЕНА. Перед эфиром укажите STREAM_URL в коде.";
-            statusMsg.style.color = "#ff8866";
-            playBtn.disabled = false;
-            playBtn.innerText = "⚠️ НЕТ ПОТОКА";
-            return false;
-        }
-        streamAudio.src = STREAM_URL;
-        streamAudio.load();
-        streamAudio.play().then(() => {
-            isPlaying = true;
-            playBtn.innerText = "⏹️ ВЫКЛЮЧИТЬ ПРИЁМНИК";
-            statusMsg.innerHTML = "🎧 СИГНАЛ ПОЙМАН — слушаем NONAME RADIO вживую!";
-            statusMsg.style.color = "#aaffcc";
-            startSignalMeter(true, true);
-        }).catch(err => {
-            console.warn("ошибка воспроизведения", err);
-            statusMsg.innerHTML = "🔇 НЕТ ДОСТУПА К ПОТОКУ. Возможно стрим ещё не начался или ссылка неверна. Проверьте перед эфиром.";
-            statusMsg.style.color = "#ffaa77";
-            isPlaying = false;
-            playBtn.innerText = "🔘 ПОВТОРНАЯ НАСТРОЙКА";
-            startSignalMeter(false, false);
-        });
-    }
-    
-    // ОСНОВНОЕ ДЕЙСТВИЕ КНОПКИ
-    playBtn.addEventListener('click', () => {
-        const nowTime = new Date();
+    playBtn.onclick = () => {
+        const now = new Date();
         const targetStart = getTargetTime();
         
+        if (now < targetStart) {
+            statusMsg.innerHTML = `⏳ Эфир начнётся 23.04 в 23:40`;
+            if (window.Telegram?.WebApp) window.Telegram.WebApp.HapticFeedback?.notificationOccurred('warning');
+            return;
+        }
+        
         if (isPlaying) {
-            stopStream();
+            if (saveInterval) clearInterval(saveInterval);
+            audio.pause();
+            isPlaying = false;
+            playBtn.innerText = "🔘 ВКЛЮЧИТЬ ЭФИР";
+            statusMsg.innerHTML = "📻 приёмник выключен";
             return;
         }
         
-        // БЛОКИРОВКА ДО СТАРТА (23.04 23:45) — но предупреждаем, даём возможность теста организатору
-        if (nowTime < targetStart) {
-            statusMsg.innerHTML = `⏳ Эфир начнётся ${targetStart.toLocaleString('ru-RU')}. Сейчас только тестовый шум. Подождите.`;
-            statusMsg.style.color = "#99cc99";
-            // имитация — ничего не включаем, только метка
-            return;
-        }
-        
-        // реальная попытка включить стрим
-        if (!STREAM_URL || STREAM_URL === "https://your-stream-url-here.com/stream") {
-            statusMsg.innerHTML = "⚙️ ОРГАНИЗАТОР: Укажи ссылку на поток в коде (STREAM_URL). Без неё приёмник молчит.";
-            return;
-        }
-        initStream();
-    });
+        statusMsg.innerHTML = "📡 Подключение к сигналу...";
+        audio.src = AUDIO_URL;
+        audio.load();
+        audio.play().then(() => {
+            isPlaying = true;
+            playBtn.innerText = "⏹️ ВЫКЛЮЧИТЬ";
+            statusMsg.innerHTML = "🎧 NONAME RADIO в эфире!";
+            saveInterval = setInterval(() => {
+                localStorage.setItem('noname_pos', audio.currentTime);
+            }, 3000);
+            if (window.Telegram?.WebApp) window.Telegram.WebApp.HapticFeedback?.impactOccurred('medium');
+        }).catch(e => {
+            statusMsg.innerHTML = "🔇 Ошибка: " + e.message;
+        });
+    };
     
-    // СИМУЛЯЦИЯ красивого радио-шума пока нет стрима
-    setInterval(() => {
-        if (!isPlaying) {
-            let randomFlicker = 5 + Math.random() * 12;
-            signalLevelDiv.style.width = randomFlicker + "%";
-            signalPercentSpan.innerText = Math.floor(randomFlicker) + "%";
-            const freqs = ["--.- FM", "шумы эфира", "вне зоны", "❄️ статика"];
-            freqDisplaySpan.innerHTML = `📡 ${freqs[Math.floor(Math.random()*freqs.length)]}`;
-        }
-    }, 1200);
+    progressBar.onclick = (e) => {
+        if (!audio.duration) return;
+        let rect = progressBar.getBoundingClientRect();
+        let percent = (e.clientX - rect.left) / rect.width;
+        audio.currentTime = percent * audio.duration;
+        updateProgress();
+    };
     
-    // обратный отсчёт каждую секунду
+    audio.ontimeupdate = () => { if (isPlaying) updateProgress(); };
+    setInterval(updateSignal, 250);
     setInterval(updateCountdown, 1000);
     updateCountdown();
-    startSignalMeter(false, false);
+    updateSignal();
     
-    // дополнительный фикс: если дата эфира наступила — меняем текст
-    const checkLive = setInterval(() => {
-        if (new Date() >= getTargetTime()) {
-            document.querySelector('.live-badge').style.borderLeftColor = "#ffaa44";
-            const countBlock = document.getElementById('countdownBlock');
-            if(countBlock.innerHTML.indexOf("ЭФИР АКТИВЕН") === -1)
-                countBlock.innerHTML = "🔴 ЭФИР АКТИВЕН — ЛОВИ ВОЛНУ! 🔴";
-            clearInterval(checkLive);
-        }
-    }, 5000);
+    let savedPos = localStorage.getItem('noname_pos');
+    if (savedPos) audio.currentTime = savedPos;
     
-    // Предзаполнение, если эфир уже активен при загрузке страницы
-    if(new Date() >= getTargetTime()){
-        document.getElementById('countdownBlock').innerHTML = "🔴 ЭФИР АКТИВЕН — НАСТРАИВАЙСЯ 🔴";
+    // Telegram WebApp поддержка
+    if (window.Telegram?.WebApp) {
+        window.Telegram.WebApp.expand();
+        window.Telegram.WebApp.ready();
     }
-    
-    console.log("NONAME RADIO | приёмник готов | замени STREAM_URL на реальный поток перед 23 апреля");
 </script>
 </body>
 </html>
