@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>NONAME RADIO — тест эфира</title>
+    <link rel="icon" href="data:,">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{min-height:100vh;background:#0a0f1a;font-family:'Courier New',monospace;padding:16px;display:flex;justify-content:center;align-items:center;}
+        .player{max-width:500px;width:100%;background:#0b0e14;border-radius:38px;border:2px solid #2a5a3a;padding:24px 20px 32px;text-align:center;}
+        .noname{font-size:2rem;font-weight:800;color:#aaffcc;letter-spacing:4px;text-shadow:0 0 6px #00cc66;}
+        .sub{font-size:0.7rem;color:#6a9c7a;margin:8px 0 20px;}
+        .tuner{background:#03070c;border-radius:32px;padding:16px;margin:20px 0;border:1px solid #2a553a;}
+        .signal-row{display:flex;justify-content:space-between;font-size:0.7rem;color:#5c9870;margin-bottom:8px;}
+        .signal-bar{background:#1a2a22;height:8px;border-radius:8px;overflow:hidden;margin-bottom:16px;}
+        .signal-fill{width:0%;height:100%;background:#00ee77;box-shadow:0 0 6px #00ee77;transition:width 0.2s;}
+        .frequency{font-size:1.4rem;text-align:center;font-family:monospace;color:#b0ffc0;margin-top:8px;}
+        .btn-power{width:100%;background:#1b2a1f;border:2px solid #39ff8e;color:#bfffcb;font-size:1.5rem;font-weight:bold;padding:14px;border-radius:60px;cursor:pointer;margin:16px 0;}
+        .status{text-align:center;font-size:0.75rem;background:#00000055;padding:8px;border-radius:60px;}
+        .time-info{display:flex;justify-content:center;font-size:0.7rem;color:#5c9870;margin-top:8px;}
+        .footer{font-size:0.6rem;text-align:center;margin-top:20px;color:#3f7457;}
+    </style>
+</head>
+<body>
+<div class="player">
+    <div class="noname">❖ NONAME RADIO ❖</div>
+    <div class="sub">*.noname = thurinay | ТЕСТ ПРЯМОГО ЭФИРА</div>
+
+    <div class="tuner">
+        <div class="signal-row"><span>◀ SIGNAL ▶</span><span id="signalPercent">0%</span></div>
+        <div class="signal-bar"><div class="signal-fill" id="signalFill"></div></div>
+        <div class="frequency" id="freqText">📡 104.2 NONAME FM</div>
+    </div>
+
+    <button class="btn-power" id="playBtn">🔘 PLAY / PAUSE</button>
+    <div class="status" id="statusMsg">⚡ ТЕСТ: эфир идёт прямо сейчас</div>
+    <div class="time-info" id="timeInfo">0:00 / 16:50</div>
+    <div class="footer">перемотка отключена • у всех одинаково</div>
+</div>
+
+<audio id="streamAudio" preload="auto"></audio>
+
+<script>
+    const AUDIO_URL = "https://github.com/skripd37-maker/vvvvvfdsfsd/raw/refs/heads/main/%D0%BD%D0%BE%D1%83%D0%BD%D0%B5%D0%B9%D0%BC%20%D1%80%D0%B0%D0%B4%D0%B8%D0%BE%20%D1%84%D1%83%D0%BB%D0%BB%20%D1%81%D1%8D%D1%82%20+%20%D0%B0%D0%BB%D1%8C%20(online-audio-converter.com).mp3";
+    
+    // Для теста — эфир стартует "прямо сейчас" (23.04.2026 00:00 UTC)
+    function getLiveStartTime() {
+        return new Date('2026-04-23T00:00:00Z');
+    }
+
+    const audio = document.getElementById('streamAudio');
+    const playBtn = document.getElementById('playBtn');
+    const statusMsg = document.getElementById('statusMsg');
+    const timeInfo = document.getElementById('timeInfo');
+    const signalFill = document.getElementById('signalFill');
+    const signalPercentSpan = document.getElementById('signalPercent');
+    const freqText = document.getElementById('freqText');
+
+    let isPlaying = false;
+    let syncInterval = null;
+
+    function formatTime(seconds) {
+        if (isNaN(seconds)) return "0:00";
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return mins + ":" + (secs < 10 ? "0" + secs : secs);
+    }
+
+    function getCurrentStreamTime() {
+        const now = new Date();
+        const start = getLiveStartTime();
+        let diffSeconds = (now - start) / 1000;
+        if (diffSeconds < 0) diffSeconds = 0;
+        return Math.min(diffSeconds, 1010);
+    }
+
+    function syncAudio() {
+        if (!audio.paused) {
+            const targetTime = getCurrentStreamTime();
+            if (Math.abs(audio.currentTime - targetTime) > 1.0) {
+                audio.currentTime = targetTime;
+                console.log("синхронизация:", audio.currentTime);
+            }
+        }
+    }
+
+    function updateSignal() {
+        if (!audio.paused) {
+            let strong = 75 + Math.sin(Date.now() / 700) * 15;
+            strong = Math.min(96, Math.max(70, strong));
+            signalFill.style.width = strong + '%';
+            signalPercentSpan.innerText = Math.floor(strong) + '%';
+            freqText.innerHTML = "⚡ 104.2 NONAME FM ⚡";
+        } else {
+            let low = 10 + Math.sin(Date.now() / 1000) * 8;
+            low = Math.min(30, Math.max(6, low));
+            signalFill.style.width = low + '%';
+            signalPercentSpan.innerText = Math.floor(low) + '%';
+            freqText.innerHTML = "📡 шум эфира";
+        }
+    }
+
+    function updateTimeDisplay() {
+        if (audio.duration) {
+            const current = getCurrentStreamTime();
+            timeInfo.innerText = `${formatTime(current)} / 16:50`;
+        }
+    }
+
+    function startLive() {
+        audio.src = AUDIO_URL;
+        audio.load();
+        
+        audio.addEventListener('canplaythrough', () => {
+            const startTime = getCurrentStreamTime();
+            audio.currentTime = startTime;
+            audio.play().then(() => {
+                isPlaying = true;
+                playBtn.innerText = "⏸️ PAUSE";
+                statusMsg.innerHTML = "🎧 ПРЯМОЙ ЭФИР (ТЕСТ)";
+                if (syncInterval) clearInterval(syncInterval);
+                syncInterval = setInterval(syncAudio, 2000);
+                setInterval(updateTimeDisplay, 500);
+            }).catch(e => {
+                statusMsg.innerHTML = "🔇 Нажмите Play, чтобы войти в эфир";
+            });
+        });
+    }
+
+    playBtn.addEventListener('click', () => {
+        if (audio.paused) {
+            const startTime = getCurrentStreamTime();
+            audio.currentTime = startTime;
+            audio.play().then(() => {
+                isPlaying = true;
+                playBtn.innerText = "⏸️ PAUSE";
+                statusMsg.innerHTML = "🎧 ПРЯМОЙ ЭФИР (ТЕСТ)";
+                if (!syncInterval) syncInterval = setInterval(syncAudio, 2000);
+            }).catch(e => {
+                statusMsg.innerHTML = "🔇 Ошибка: " + e.message;
+            });
+        } else {
+            audio.pause();
+            isPlaying = false;
+            playBtn.innerText = "🔘 PLAY";
+            statusMsg.innerHTML = "⚡ Пауза. Нажмите Play, чтобы вернуться в эфир";
+        }
+    });
+
+    setInterval(updateSignal, 250);
+    startLive();
+</script>
+</body>
+</html>
